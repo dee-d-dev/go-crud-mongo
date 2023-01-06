@@ -28,6 +28,7 @@ func UpdateTodo(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
 	params := mux.Vars(r)
+	
 	result := helpers.UpdateTodo(params["id"])
 	json.NewEncoder(w).Encode(result)
 

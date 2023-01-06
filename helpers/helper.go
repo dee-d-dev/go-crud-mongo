@@ -7,32 +7,30 @@ import (
 	"os"
 
 	"github.com/dee-d-dev/go-mongodb-crud/models"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"github.com/joho/godotenv"
 )
 
 var connectionString string
 var dbName string
-
 
 var collection *mongo.Collection
 var ctx = context.TODO()
 
 func init() {
 	err := godotenv.Load() // 👈 load .env file
-    if err != nil {
-    	log.Fatal(err)
-    }
-    
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	connectionString = os.Getenv("connectionString")
 	dbName = os.Getenv("dbName")
 	collectionName := os.Getenv("collectionName")
-    
-    // fmt.Println(connectionString)
-    
+
+	// fmt.Println(connectionString)
 
 	clientOptions := options.Client().ApplyURI(connectionString)
 	client, err := mongo.Connect(ctx, clientOptions)
@@ -62,11 +60,17 @@ func CreateTodo(todo models.Todo) *mongo.InsertOneResult {
 func UpdateTodo(todoId string) *mongo.UpdateResult {
 	id, _ := primitive.ObjectIDFromHex(todoId)
 
-	filter := bson.M{"_id": id}
+	// filter :=
 
-	update := bson.M{"$set": bson.M{"completed": true}}
+	// update :=
 
-	result, err := collection.UpdateOne(context.Background(), filter, update)
+	var model Model
+	if err := json.NewDecoder(response.Body).Decode(model); err != nil {
+			// handle m
+			log.Fatal(err)
+	}
+
+	result, err := collection.UpdateOne(context.Background(), bson.M{"_id": id}, bson.D{{"$set", bson.D{{"title", "First go title"}}}})
 
 	if err != nil {
 		log.Fatal(err)
