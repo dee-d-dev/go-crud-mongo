@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/dee-d-dev/go-mongodb-crud/models"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -89,7 +90,7 @@ func getAllTodos() []primitive.M {
 }
 
 func deleteTodo(todoId string) *mongo.DeleteResukf {
-	id, _ = primitive.ObjectIDFromHex
+	id, _ = primitive.ObjectIDFromHex(todoId)
 
 	filter := bson.M{"_id": id}
 
@@ -97,4 +98,60 @@ func deleteTodo(todoId string) *mongo.DeleteResukf {
 	helper.HandleError(err)
 	fmt.Println("Deleted", id)
 	return result
+}
+
+func deleteAll() int64 {
+	result, err := collection.DeleteMany(context.Background(), bson.D{{}})
+	helper.HandleError(err)
+
+	return result.DeletedCount
+
+}
+
+func CreateOne(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	var todo model.Todo
+	_ = json.NewDecoder(r.Body).Decode(&todo)
+
+	result := createTodo(todo)
+
+	json.NewEncoder(w).Encode(result)
+}
+
+
+func UpdateTodo(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
+
+	params := mux.Vars(r)
+	result := updateTodo(params["id"])
+	json.NewEncoder(w).Encode(result)
+
+}
+
+func Delete(w http.ReponseWriter, r *http.Request){
+	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
+
+	params := mux.Vars(r)
+	result := deleteTodo(params["id"])
+	json.NewEncoder(w).Encode(result)
+}
+
+func Todos(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "GET")
+
+	result := getAllTodos()
+	json.NewEncoder(w).Encode(result)
+}
+
+func DeleteEverything(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
+
+    result := deleteAll()
+    json.NewEncoder(w).Encode(result)
 }
